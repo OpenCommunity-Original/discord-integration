@@ -32,6 +32,12 @@ chat:
   crash-embed:
     enabled: true
     color: 0xff8d0a
+  message-enabled:
+    enabled: true
+    color: 0x06d6a0
+  message-disabled:
+    enabled: true
+    color: 0xef476f
   avatar:
     # Set to true on cracked servers,
     # for premium player heads to work:

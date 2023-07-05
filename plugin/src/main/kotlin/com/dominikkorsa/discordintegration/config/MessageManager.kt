@@ -29,6 +29,8 @@ class MessageManager(plugin: DiscordIntegration): CustomConfig(plugin, "messages
     class Discord(private val section: Section) {
         val join get() = section.requireTrimmedString("join")
         val quit get() = section.requireTrimmedString("quit")
+        val enabledMessage get() = section.requireTrimmedString("enabled")
+        val disabledMessage get() = section.requireTrimmedString("disabled")
         val death get() = section.requireTrimmedString("death")
         val deathFallback get() = section.requireTrimmedString("death-fallback")
         val deathEmbedTitle get() = section.requireTrimmedString("death-embed-title")

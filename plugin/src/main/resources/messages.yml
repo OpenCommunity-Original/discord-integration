@@ -6,6 +6,8 @@ connection-failed: '§c§lDiscord Integration failed to connect'
 discord-activity: '%online%/%max% players online: %player-list%'
 discord-activity-empty: 'No players online'
 discord:
+  enabled: 'The server has started!'
+  disabled: 'The server has stopped!'
   join: '**%player% joined the server**'
   quit: '**%player% left the server**'
   death: '**%death-message%**'

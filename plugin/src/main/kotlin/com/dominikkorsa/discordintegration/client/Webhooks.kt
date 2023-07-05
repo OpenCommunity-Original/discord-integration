@@ -40,6 +40,30 @@ class Webhooks(private val plugin: DiscordIntegration) {
 
     private suspend fun sendWebhook(build: WebhookExecuteSpec.Builder.() -> Unit) = sendWebhook(null, build)
 
+    suspend fun sendEnabledMessage() {
+        if (!plugin.configManager.chat.messageEnabled.enabled) return
+
+        sendWebhook {
+            addEmbed {
+                title(plugin.messages.discord.enabledMessage)
+                color(plugin.configManager.chat.messageEnabled.color)
+                build()
+            }
+        }
+    }
+
+    suspend fun sendDisabledMessage() {
+        if (!plugin.configManager.chat.messageDisabled.enabled) return
+
+        sendWebhook {
+            addEmbed {
+                title(plugin.messages.discord.disabledMessage)
+                color(plugin.configManager.chat.messageDisabled.color)
+                build()
+            }
+        }
+    }
+
     suspend fun notifyCrashed(timestamp: Long) {
         if (!plugin.configManager.chat.crashEmbed.enabled) return
         sendWebhook {

@@ -73,6 +73,8 @@ class ConfigManager(plugin: DiscordIntegration) : CustomConfig(plugin, "config.y
         val quit get() = EmbedOrMessage(section.getSection("quit"))
         val death get() = EmbedOrMessage(section.getSection("death"))
         val crashEmbed get() = Embed(section.getSection("crash-embed"))
+        val messageEnabled get() = Embed(section.getSection("message-enabled"))
+        val messageDisabled get() = Embed(section.getSection("message-disabled"))
         val ignoreCancelledChatEvents get() = section.requireBoolean("ignore-cancelled-chat-events")
     }
 

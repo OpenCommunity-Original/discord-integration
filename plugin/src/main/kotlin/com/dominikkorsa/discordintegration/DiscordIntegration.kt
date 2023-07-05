@@ -23,19 +23,15 @@ import com.dominikkorsa.discordintegration.utils.bunchLines
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import discord4j.core.`object`.entity.Message
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.time.withTimeout
-import net.md_5.bungee.api.chat.TextComponent
-import org.bstats.bukkit.Metrics
-import org.bstats.charts.SimplePie
 import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import java.lang.Runnable
 import java.time.Duration
 import kotlin.time.toKotlinDuration
 
@@ -67,15 +63,6 @@ class DiscordIntegration : JavaPlugin() {
         messages = MessageManager(this)
         dynmap = DynmapIntegration.create()
 
-        val metrics = Metrics(this, 15660)
-        metrics.addCustomChart(SimplePie("linking") {
-            when {
-                !configManager.linking.enabled -> "Disabled"
-                configManager.linking.mandatory -> "Mandatory"
-                else -> "Not mandatory"
-            }
-        })
-
         initCommands()
         registerAllEvents()
         startLogging()
@@ -89,20 +76,29 @@ class DiscordIntegration : JavaPlugin() {
             lockFileService.start()
             connectionLock.withLock { connect() }
             showWarnings()
-            updateCheckerService.start()
+            webhooks.sendEnabledMessage()
         }
     }
 
     override fun onDisable() {
+        runBlocking {
+            launch {
+                sendDisabledMessage()
+            }
+        }
         super.onDisable()
         lockFileService.stop()
-        updateCheckerService.stop()
+
         console.stop()
         runBlocking {
             withTimeout(Duration.ofSeconds(5)) {
                 connectionLock.withLock { disconnect() }
             }
         }
+    }
+
+    suspend fun sendDisabledMessage() {
+        this.webhooks.sendDisabledMessage()
     }
 
     private suspend fun connect() {
@@ -180,8 +176,6 @@ class DiscordIntegration : JavaPlugin() {
         server.onlinePlayers.forEach {
             Compatibility.sendChatMessage(it, *parts)
         }
-        Bukkit.getConsoleSender().sendMessage(TextComponent(*parts).toLegacyText())
-        dynmap?.sendMessage(TextComponent.toPlainText(*parts))
     }
 
     private fun registerSuspendingEvents(listener: Listener) {

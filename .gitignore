@@ -1,3 +1,14 @@
+target/
+.project
+.classpath
+.settings
+.idea
+.vscode
+.gradle
+bin/
+build/
+old/
+gradle/
 .gradle
 **/build/
 !main/src/**/build/

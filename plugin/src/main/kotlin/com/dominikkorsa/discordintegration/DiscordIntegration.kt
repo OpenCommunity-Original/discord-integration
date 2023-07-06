@@ -5,7 +5,6 @@ import com.dominikkorsa.discordintegration.client.Client
 import com.dominikkorsa.discordintegration.client.DiscordCommands
 import com.dominikkorsa.discordintegration.client.Webhooks
 import com.dominikkorsa.discordintegration.command.DiscordIntegrationCommand
-import com.dominikkorsa.discordintegration.compatibility.Compatibility
 import com.dominikkorsa.discordintegration.config.ConfigManager
 import com.dominikkorsa.discordintegration.config.MessageManager
 import com.dominikkorsa.discordintegration.console.Console
@@ -18,7 +17,6 @@ import com.dominikkorsa.discordintegration.linking.Linking
 import com.dominikkorsa.discordintegration.listener.*
 import com.dominikkorsa.discordintegration.luckperms.registerLuckPerms
 import com.dominikkorsa.discordintegration.playerlist.PlayerList
-import com.dominikkorsa.discordintegration.update.UpdateCheckerService
 import com.dominikkorsa.discordintegration.utils.bunchLines
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
@@ -48,7 +46,6 @@ class DiscordIntegration : JavaPlugin() {
     val db = Db(this)
     val linking = Linking(this)
     val playerList = PlayerList(this)
-    val updateCheckerService = UpdateCheckerService(this)
 
     private val lockFileService = LockFileService(this)
     lateinit var configManager: ConfigManager
@@ -151,13 +148,11 @@ class DiscordIntegration : JavaPlugin() {
         messages.reload()
         db.reload()
         linking.kickUnlinked()
-        updateCheckerService.stop()
         connectionLock.withLock {
             disconnect()
             connect()
         }
         showWarnings()
-        updateCheckerService.start()
     }
 
     private fun initCommands() {

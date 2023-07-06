@@ -5,7 +5,6 @@ import com.dominikkorsa.discordintegration.compatibility.Compatibility
 import com.dominikkorsa.discordintegration.compatibility.Compatibility.setCopyToClipboard
 import com.dominikkorsa.discordintegration.replace.Replacer
 import com.dominikkorsa.discordintegration.replace.Replacer.Companion.replaceTo
-import com.dominikkorsa.discordintegration.update.PendingUpdate
 import com.dominikkorsa.discordintegration.utils.*
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.*
@@ -138,16 +137,4 @@ class MinecraftFormatter(val plugin: DiscordIntegration) {
 
     fun formatLinkingSuccess(user: User) = plugin.messages.minecraft.linkingSuccess
         .replace("%user-tag%", user.tag)
-
-    fun formatUpdateNotification(pendingUpdate: PendingUpdate) = plugin.messages.minecraft.updateMessage
-        .replace("%current-version%", pendingUpdate.currentVersion)
-        .replace("%latest-version%", pendingUpdate.latestVersion)
-        .replace("%url%", pendingUpdate.url)
-        .split("%link%")
-        .mapAndJoin({ TextComponent(*TextComponent.fromLegacyText(it)) }, {
-            TextComponent(*TextComponent.fromLegacyText(plugin.messages.minecraft.updateLink)).apply {
-                clickEvent = ClickEvent(ClickEvent.Action.OPEN_URL, pendingUpdate.url)
-                hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent(pendingUpdate.url)))
-            }
-        })
 }

@@ -11,7 +11,6 @@ class PlayerCountListener(private val plugin: DiscordIntegration) : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     suspend fun onPlayerJoin(event: PlayerJoinEvent) {
         plugin.playerList.onPlayerJoin(event.player)
-        plugin.updateCheckerService.notify(event.player)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

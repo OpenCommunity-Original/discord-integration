@@ -12,25 +12,10 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.bukkit.Bukkit
-import org.jetbrains.exposed.dao.UUIDEntity
-import org.jetbrains.exposed.dao.UUIDEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.io.File
 import java.util.*
 
 class Db(private val plugin: DiscordIntegration) {
-    object LegacyPlayersColumn : UUIDTable("Players") {
-        val discordId = long("discordId").nullable().uniqueIndex()
-    }
-
-    class LegacyPlayerEntity(id: EntityID<UUID>) : UUIDEntity(id) {
-        companion object : UUIDEntityClass<LegacyPlayerEntity>(LegacyPlayersColumn)
-
-        var discordId by LegacyPlayersColumn.discordId
-    }
 
     private object SnowflakeSerializer : KSerializer<Snowflake> {
         override val descriptor = PrimitiveSerialDescriptor("Snowflake", PrimitiveKind.LONG)
@@ -61,32 +46,6 @@ class Db(private val plugin: DiscordIntegration) {
     private var players = HashMap<UUID, Player>()
     private val file = File(plugin.dataFolder, "players.yml")
 
-    private suspend fun migrateDb() {
-        withContext(IO) {
-            val legacyDbFile = File(plugin.dataFolder, "database.db").absoluteFile
-            if (!legacyDbFile.exists()) return@withContext
-            plugin.logger.warning("Migrating player database to YAML")
-            try {
-                Database.connect("jdbc:sqlite:$legacyDbFile", "org.sqlite.JDBC")
-                newSuspendedTransaction {
-                    players.putAll(LegacyPlayerEntity.all().map {
-                        Pair(it.id.value, Player(it.discordId?.let(Snowflake::of)))
-                    })
-                }
-                save()
-                plugin.logger.warning("Migration complete")
-                val newFile = File(legacyDbFile.parent, "database-backup.db")
-                legacyDbFile.copyTo(newFile)
-                plugin.logger.warning("Created database backup at $newFile")
-                legacyDbFile.delete()
-                legacyDbFile.deleteOnExit()
-            } catch (error: Exception) {
-                plugin.logger.severe("Failed to migrate player database")
-                plugin.logger.severe(error.toString())
-            }
-        }
-    }
-
     private suspend fun save() {
         withContext(IO) {
             Yaml.default.encodeToStream(playerMapSerializer, players, file.outputStream())
@@ -110,7 +69,6 @@ class Db(private val plugin: DiscordIntegration) {
 
     suspend fun init() {
         load()
-        migrateDb()
         buildIndexes()
     }
 

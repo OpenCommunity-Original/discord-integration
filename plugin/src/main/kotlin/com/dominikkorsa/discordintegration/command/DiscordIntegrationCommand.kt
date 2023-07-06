@@ -24,7 +24,6 @@ class DiscordIntegrationCommand(val plugin: DiscordIntegration): BaseCommand() {
     }
 
     @Subcommand("link")
-    @CommandPermission("discordintegration.command.link")
     fun onLink(sender: Player) {
         if (!plugin.configManager.linking.enabled) {
             sender.sendMessage(plugin.messages.commands.linkDisabled)
@@ -36,7 +35,6 @@ class DiscordIntegrationCommand(val plugin: DiscordIntegration): BaseCommand() {
     }
 
     @Subcommand("unlink")
-    @CommandPermission("discordintegration.command.unlink")
     fun onUnlink(sender: Player) {
         plugin.launch {
             sender.sendMessage(

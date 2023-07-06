@@ -386,7 +386,6 @@ class Client(private val plugin: DiscordIntegration) {
                     val roles = member.roles.collectList().block() ?: emptyList()
                     val hasRole = roles.any { role ->
                         val roleNameMatches = role.name.equals(roleName, ignoreCase = true)
-                        println("Comparing role '${role.name}' with '$roleName': $roleNameMatches")
                         roleNameMatches
                     }
                     member to hasRole
@@ -395,49 +394,9 @@ class Client(private val plugin: DiscordIntegration) {
             ?.toList()
             ?.awaitAll()
             ?.firstOrNull { it?.first?.id == memberId }
-            ?.also { result ->
-                println("Roles for member $memberId:")
-                result?.first?.roles?.collectList()?.block()?.forEach { role ->
-                    println(role.name)
-                }
-            }
             ?.second
             ?: false
     }
-
-
-
-
-
-
-    /*suspend fun doesMemberHaveRole(memberId: Snowflake, roleName: String): Boolean = coroutineScope {
-        gateway
-            ?.guilds
-            ?.asFlow()
-            ?.mapNotNull { guild ->
-                async {
-                    val member = guild.getMemberById(memberId).handleNotFound() ?: return@async null
-                    val roles = getLinkingRoles(guild)
-                    val (linkedRoles, _) = roles
-                    val hasRole = linkedRoles.any { it.name.equals(roleName, ignoreCase = true) }
-                    member to hasRole
-                }
-            }
-            ?.toList()
-            ?.awaitAll()
-            ?.firstOrNull { it?.first?.id == memberId }
-            ?.also { result ->
-                println("Roles for member $memberId:")
-                result?.first?.roles?.collectList()?.block()?.forEach { role ->
-                    println(role.name)
-                }
-            }
-            ?.second
-            ?: false
-    }*/
-
-
-
 
     suspend fun sendConsoleMessage(message: String): Unit = coroutineScope {
         gateway?.apply {

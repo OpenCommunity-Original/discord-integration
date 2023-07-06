@@ -59,6 +59,7 @@ chat:
   ignore-cancelled-chat-events: true
   discord-url: "https://discord.gg/HWPAExBt3A"
   discord-execute-role: "MODER"
+  discord-execute-allowed-commands: "ban, tps, co, unban, cwhitelist, togglejoin"
 activity:
   # Interval (in seconds) of Discord activity updates
   # Activity is also updated every time a player enters or leaves the server

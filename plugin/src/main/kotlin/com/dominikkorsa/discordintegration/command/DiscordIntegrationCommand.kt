@@ -15,7 +15,7 @@ class DiscordIntegrationCommand(val plugin: DiscordIntegration): BaseCommand() {
     fun onDefault() {
         val discordUrl = plugin.configManager.chat.discordUrl
         val discordTitle = plugin.messages.discord.discordJoinTitle
-        currentCommandIssuer.sendMessage("${ChatColor.GREEN}${ChatColor.BOLD} $discordTitle $discordUrl")
+        currentCommandIssuer.sendMessage("\n${ChatColor.GREEN}${ChatColor.BOLD} $discordTitle $discordUrl\n ")
     }
     @Subcommand("reload")
     @CommandPermission("discordintegration.command.reload")

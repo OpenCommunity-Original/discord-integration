@@ -34,6 +34,7 @@ class MessageManager(plugin: DiscordIntegration): CustomConfig(plugin, "messages
         val death get() = section.requireTrimmedString("death")
         val deathFallback get() = section.requireTrimmedString("death-fallback")
         val deathEmbedTitle get() = section.requireTrimmedString("death-embed-title")
+        val discordJoinTitle get() = section.requireTrimmedString("discord-join")
         val crashEmbedTitle get() = section.requireTrimmedString("crash-embed.title")
         val crashEmbedContent get() = section.requireTrimmedString("crash-embed.content")
         val crashEmbedLastOnline get() = section.requireTrimmedString("crash-embed.last-online")

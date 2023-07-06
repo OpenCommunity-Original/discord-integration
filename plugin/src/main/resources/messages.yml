@@ -13,6 +13,7 @@ discord:
   death: '**%death-message%**'
   death-fallback: '**%player% died**'
   death-embed-title: '**%player% died**'
+  discord-join: 'Join our discord: '
   crash-embed:
     title: Server started after crash
     content: |

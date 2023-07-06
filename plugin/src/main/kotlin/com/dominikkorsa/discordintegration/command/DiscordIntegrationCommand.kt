@@ -5,11 +5,18 @@ import co.aikar.commands.annotation.*
 import com.dominikkorsa.discordintegration.DiscordIntegration
 import com.dominikkorsa.discordintegration.compatibility.Compatibility
 import com.github.shynixn.mccoroutine.bukkit.launch
+import net.md_5.bungee.api.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-@CommandAlias("discordintegration|di")
+@CommandAlias("discordintegration|di|discord")
 class DiscordIntegrationCommand(val plugin: DiscordIntegration): BaseCommand() {
+    @Default
+    fun onDefault() {
+        val discordUrl = plugin.configManager.chat.discordUrl
+        val discordTitle = plugin.messages.discord.discordJoinTitle
+        currentCommandIssuer.sendMessage("${ChatColor.GREEN}${ChatColor.BOLD} $discordTitle $discordUrl")
+    }
     @Subcommand("reload")
     @CommandPermission("discordintegration.command.reload")
     fun onReload() {
@@ -42,7 +49,6 @@ class DiscordIntegrationCommand(val plugin: DiscordIntegration): BaseCommand() {
     }
 
     @Subcommand("help")
-    @Default
     fun onHelp(sender: CommandSender) {
         sender.sendMessage(plugin.minecraftFormatter.formatHelpHeader())
         sendHelpCommandItem(sender, "/di help", "help")

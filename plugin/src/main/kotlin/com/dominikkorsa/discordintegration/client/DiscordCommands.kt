@@ -16,7 +16,7 @@ import org.bukkit.Bukkit
 
 class DiscordCommands(private val plugin: DiscordIntegration) {
     companion object {
-        private const val linkCommandName = "link-minecraft"
+        private const val linkCommandName = "link"
         private const val profileInfoCommandName = "Minecraft profile info"
     }
 

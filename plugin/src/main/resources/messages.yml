@@ -73,7 +73,7 @@ minecraft:
       §6Please link your Discord account,
       §6by executing this command on our Discord server:
       
-      §r/link-minecraft %code%
+      §r/link %code%
       
       §7This code will expire after 10 minutes
       
@@ -109,7 +109,7 @@ commands:
     message: |
       §9Execute this command on our Discord server, 
       §9to link your Discord account:
-      §r/link-minecraft §l%code%
+      §r/link §l%code%
       §9This code will expire after 10 minutes
     code-tooltip: 'Click to copy code'
   unlink:

@@ -30,7 +30,7 @@ class Linking(private val plugin: DiscordIntegration) {
         val allowedChars = ('a'..'z') + ('0'..'9')
         var code: String
         do {
-            code = (1..6).map { allowedChars.random() }.joinToString("")
+            code = (1..4).map { allowedChars.random() }.joinToString("")
         } while (linkingCodes.containsKey(code))
         val linkingCode = LinkingCode(code, player)
         linkingCodes[code] = linkingCode

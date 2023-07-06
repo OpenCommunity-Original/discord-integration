@@ -196,11 +196,8 @@ class MinecraftFormatter(val plugin: DiscordIntegration) {
         val content = contentDeferred.await()
 
         val prefixHoverEvent: Component = Component.text()
-            .hoverEvent(Component.text()
-                .content(plugin.messages.minecraft.tooltip
-                    .formatDiscordMessagePrefix(channel, channelCategory, guild, author, authorColor)
-                )
-                .build()
+            .content(plugin.messages.minecraft.tooltip
+                .formatDiscordMessagePrefix(channel, channelCategory, guild, author, authorColor)
             )
             .build()
 

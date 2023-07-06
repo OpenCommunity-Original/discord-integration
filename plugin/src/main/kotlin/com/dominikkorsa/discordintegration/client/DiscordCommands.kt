@@ -17,14 +17,37 @@ import org.bukkit.Bukkit
 class DiscordCommands(private val plugin: DiscordIntegration) {
     companion object {
         private const val linkCommandName = "link"
+        private const val executeCommandName = "execute"
         private const val profileInfoCommandName = "Minecraft profile info"
     }
 
     suspend fun handleChatInputInteraction(event: ChatInputInteractionEvent) {
         when (event.commandName) {
             linkCommandName -> handleLinkMinecraftCommand(event)
+            executeCommandName -> handleExecuteCommand(event)
             else -> event.deleteReply().awaitFirstOrNull()
         }
+    }
+
+    private suspend fun handleExecuteCommand(event: ChatInputInteractionEvent) {
+        val executorId = event.interaction.user.id
+        val discordRole = plugin.configManager.chat.discordExecuteRole
+        event.deferReply().withEphemeral(true).awaitFirstOrNull()
+        if (!plugin.client.doesMemberHaveRole(executorId, discordRole)) {
+            event.editReply(
+                InteractionReplyEditSpec.create()
+                    .withEmbeds(
+                        EmbedCreateSpec.create()
+                            .withTitle("You don't have permission to execute commands.")
+                            .withColor(Color.of(0xef476f))
+                    )
+            ).awaitFirstOrNull()
+            return
+        }
+
+        val command = event.getOption("command").get().value.get().asString()
+        val result = plugin.runConsoleCommand(command)
+        event.editReply("Command executed in Minecraft console:\n```\n$result\n```").awaitFirstOrNull()
     }
 
     private suspend fun handleLinkMinecraftCommand(event: ChatInputInteractionEvent) {
@@ -137,6 +160,18 @@ class DiscordCommands(private val plugin: DiscordIntegration) {
             name(profileInfoCommandName)
         }
 
-        return listOf(linkMinecraftCommand, userInfoCommand)
+        val executeCommand = createApplicationCommand {
+            name(executeCommandName)
+            description("Execute a Minecraft command")
+            addOption {
+                name("command")
+                description("Minecraft command")
+                type(ApplicationCommandOption.Type.STRING.value)
+                required(true)
+            }
+        }
+
+        return listOf(linkMinecraftCommand, userInfoCommand, executeCommand)
     }
+
 }

@@ -31,6 +31,8 @@ import net.kyori.adventure.text.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.lang.Runnable
 import java.time.Duration
 import kotlin.time.toKotlinDuration
@@ -227,8 +229,15 @@ class DiscordIntegration : JavaPlugin() {
         client.sendConsoleMessage(message)
     }
 
-    fun runConsoleCommand(command: String) {
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)
+    fun runConsoleCommand(command: String): String {
+        val output = ByteArrayOutputStream()
+        val consoleSender = Bukkit.getConsoleSender()
+        try {
+            Bukkit.dispatchCommand(consoleSender, command)
+        } catch (e: Throwable) {
+            return "ERROR"
+        }
+        return output.toString()
     }
 
     fun runTask(fn: () -> Unit) {

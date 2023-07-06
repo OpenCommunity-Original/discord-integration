@@ -70,6 +70,7 @@ class ConfigManager(plugin: DiscordIntegration) : CustomConfig(plugin, "config.y
         val avatarOfflineMode get() = section.requireBoolean("avatar.offline-mode")
         val avatarUrl get() = section.requireTrimmedString("avatar.url")
         val discordUrl get() = section.requireTrimmedString("discord-url")
+        val discordExecuteRole get() = section.requireTrimmedString("discord-execute-role")
         val join get() = EmbedOrMessage(section.getSection("join"))
         val quit get() = EmbedOrMessage(section.getSection("quit"))
         val death get() = EmbedOrMessage(section.getSection("death"))

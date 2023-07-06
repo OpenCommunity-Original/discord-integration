@@ -18,7 +18,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
-import net.md_5.bungee.api.chat.BaseComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
@@ -176,7 +177,7 @@ class MinecraftFormatter(val plugin: DiscordIntegration) {
     ) = formatChannel(channel, channelCategory, guild)
         .formatUser(author, authorColor, plugin.messages.minecraft.defaultAuthorColor)
 
-    suspend fun formatDiscordMessage(message: Message): List<BaseComponent> = coroutineScope {
+    suspend fun formatDiscordMessage(message: Message): net.kyori.adventure.text.TextComponent = coroutineScope {
         val channelDeferred = async {
             message.channel.awaitFirstOrNull()?.tryCast<GuildMessageChannel>()
                 ?.let { it to it.tryCast<CategorizableChannel>()?.category?.awaitFirstOrNull() }
@@ -188,32 +189,48 @@ class MinecraftFormatter(val plugin: DiscordIntegration) {
                 ?: (message.author.get() to null)
         }
         val guildDeferred = async { message.guild.awaitSingle() }
-        val contentDeferred = async { formatDiscordMessageContent(message) }
+        val contentDeferred = async { message }
         val (author, authorColor) = authorDeferred.await()
         val (channel, channelCategory) = channelDeferred.await()
         val guild = guildDeferred.await()
         val content = contentDeferred.await()
-        val prefixHoverEvent = HoverEvent(
-            HoverEvent.Action.SHOW_TEXT,
-            TextComponent.fromLegacyText(
-                plugin.messages.minecraft.tooltip
+
+        val prefixHoverEvent: Component = Component.text()
+            .hoverEvent(Component.text()
+                .content(plugin.messages.minecraft.tooltip
                     .formatDiscordMessagePrefix(channel, channelCategory, guild, author, authorColor)
+                )
+                .build()
             )
-        )
-        plugin.messages.minecraft.message
-            .formatTime(message.timestamp)
-            .split("%content%")
-            .mapAndJoin({
-                TextComponent(
-                    *TextComponent.fromLegacyText(
-                        it.formatDiscordMessagePrefix(channel, channelCategory, guild, author, authorColor)
-                    )
-                ).apply { hoverEvent = prefixHoverEvent }
-            }, {
-                TextComponent.fromLegacyText(extractColorCodes(it).toList().joinToString("")).last().apply {
-                    content.forEach(::addExtra)
-                }
-            })
+            .build()
+
+        LegacyComponentSerializer.legacyAmpersand().deserialize(
+            plugin.messages.minecraft.message
+                .formatTime(message.timestamp)
+                .replace("%content%", content.content)
+                .replace("%nickname%", author.username)
+                .replace("%user-color%", authorColor?.toHtml()?.let(Compatibility::hexChatColor) ?: plugin.messages.minecraft.memberMentionDefaultColor)
+                .replace("%channel-name%", channel.name)
+        ).hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(prefixHoverEvent))
+
+        /*
+        .apply(net.kyori.adventure.text.event.HoverEvent(HoverEvent.Action.SHOW_TEXT, prefixHoverEvent))
+                .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(prefixHoverEvent));
+         */
+
+        /*LegacyComponentSerializer.legacyAmpersand().deserialize(
+            plugin.messages.minecraft.message
+                .formatTime(message.timestamp)
+                .split("%content%")
+                .mapAndJoin({
+                            it.formatDiscordMessagePrefix(channel, channelCategory, guild, author, authorColor)
+                    ).apply { hoverEvent = prefixHoverEvent }
+                }, {
+                    TextComponent.fromLegacyText(extractColorCodes(it).toList().joinToString("")).last().apply {
+                        content.forEach(::addExtra)
+                    }
+                })
+        )*/
     }
 
     fun formatHelpHeader() = plugin.messages.commands.helpHeader

@@ -28,6 +28,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.time.withTimeout
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
@@ -172,9 +174,9 @@ class DiscordIntegration : JavaPlugin() {
     }
 
     suspend fun broadcastDiscordMessage(message: Message) {
-        val parts = minecraftFormatter.formatDiscordMessage(message).toTypedArray()
+        val component: TextComponent = minecraftFormatter.formatDiscordMessage(message)
         server.onlinePlayers.forEach {
-            Compatibility.sendChatMessage(it, *parts)
+            it.sendMessage(component)
         }
     }
 

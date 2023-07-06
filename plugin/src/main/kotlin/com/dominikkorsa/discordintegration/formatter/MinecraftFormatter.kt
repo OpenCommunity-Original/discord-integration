@@ -72,102 +72,6 @@ class MinecraftFormatter(val plugin: DiscordIntegration) {
             .replace("%time-long%", zonedTime.format(longFormatter))
     }
 
-    private suspend fun formatDiscordMessageContent(message: Message) = coroutineScope {
-        plugin.emojiFormatter
-            .replaceEmojis(message.content.trimEnd())
-            .replaceTo(
-                listOf(
-                    Replacer(Pattern.compile("<@!?(\\d+)>")) {
-                        async {
-                            val guildMember = plugin.client.getMember(message.guildId.get(), Snowflake.of(it.group(1)))
-                                ?: return@async listOf(TextComponent(it.group()))
-                            val color = guildMember.getColorOrNull()
-                            val component = TextComponent(
-                                *TextComponent.fromLegacyText(
-                                    plugin.messages.minecraft.memberMentionContent.formatUser(
-                                        guildMember,
-                                        color,
-                                        plugin.messages.minecraft.memberMentionDefaultColor
-                                    )
-                                )
-                            )
-                            component.hoverEvent = HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                TextComponent.fromLegacyText(
-                                    plugin.messages.minecraft.memberMentionTooltip.formatUser(
-                                        guildMember,
-                                        color,
-                                        plugin.messages.minecraft.memberMentionDefaultColor
-                                    )
-                                )
-                            )
-                            listOf(component)
-                        }
-                    },
-                    Replacer(Pattern.compile("<@&(\\d+)>")) {
-                        async {
-                            val role = plugin.client.getRole(message.guildId.get(), Snowflake.of(it.group(1)))
-                                ?: return@async listOf(TextComponent(it.group()))
-                            val component = TextComponent(
-                                *TextComponent.fromLegacyText(
-                                    plugin.messages.minecraft.roleMentionContent.formatRole(role)
-                                )
-                            )
-                            component.hoverEvent = HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                TextComponent.fromLegacyText(
-                                    plugin.messages.minecraft.roleMentionTooltip.formatRole(role)
-                                )
-                            )
-                            listOf(component)
-                        }
-                    },
-                    Replacer(Pattern.compile("<#(\\d+)>")) {
-                        async {
-                            // TODO: Add support for threads
-                            // See: https://github.com/Discord4J/Discord4J/issues/958
-                            val channel = plugin.client.getChannel(Snowflake.of(it.group(1)))
-                                ?.tryCast<GuildMessageChannel>()
-                                ?: return@async listOf(TextComponent(it.group()))
-                            val categoryDeferred = async {
-                                channel.tryCast<CategorizableChannel>()?.category?.awaitFirstOrNull()
-                            }
-                            val guildDeferred = async { channel.guild.awaitSingle() }
-                            val category = categoryDeferred.await()
-                            val guild = guildDeferred.await()
-                            val component = TextComponent(
-                                *TextComponent.fromLegacyText(
-                                    plugin.messages.minecraft.channelMentionContent.formatChannel(
-                                        channel,
-                                        category,
-                                        guild,
-                                    )
-                                )
-                            )
-                            component.hoverEvent = HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                TextComponent.fromLegacyText(
-                                    plugin.messages.minecraft.channelMentionTooltip.formatChannel(
-                                        channel,
-                                        category,
-                                        guild,
-                                    )
-                                )
-                            )
-                            listOf(component)
-                        }
-                    },
-                )
-            ) {
-                async {
-                    if (it.isEmpty()) return@async listOf<TextComponent>()
-                    else return@async TextComponent.fromLegacyText(it).toList()
-                }
-            }
-            .awaitAll()
-            .flatten()
-    }
-
     private fun String.formatDiscordMessagePrefix(
         channel: GuildMessageChannel,
         channelCategory: Category?,
@@ -210,24 +114,6 @@ class MinecraftFormatter(val plugin: DiscordIntegration) {
                 .replace("%channel-name%", channel.name)
         ).hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(prefixHoverEvent))
 
-        /*
-        .apply(net.kyori.adventure.text.event.HoverEvent(HoverEvent.Action.SHOW_TEXT, prefixHoverEvent))
-                .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(prefixHoverEvent));
-         */
-
-        /*LegacyComponentSerializer.legacyAmpersand().deserialize(
-            plugin.messages.minecraft.message
-                .formatTime(message.timestamp)
-                .split("%content%")
-                .mapAndJoin({
-                            it.formatDiscordMessagePrefix(channel, channelCategory, guild, author, authorColor)
-                    ).apply { hoverEvent = prefixHoverEvent }
-                }, {
-                    TextComponent.fromLegacyText(extractColorCodes(it).toList().joinToString("")).last().apply {
-                        content.forEach(::addExtra)
-                    }
-                })
-        )*/
     }
 
     fun formatHelpHeader() = plugin.messages.commands.helpHeader
